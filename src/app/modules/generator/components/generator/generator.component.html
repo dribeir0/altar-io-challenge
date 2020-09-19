@@ -1,0 +1,18 @@
+<form [formGroup]="formGroup" class="form">
+    
+    <button  mat-button (click)="start()">Start</button>
+    
+    <mat-form-field class="form-element" style="float: right;">
+        <input matInput placeholder="Letter" formControlName="letter">
+    </mat-form-field>
+
+</form>
+
+<span class="center result">Result: {{result}}</span>
+
+<div class="center grid-container">
+    <ng-container *ngFor="let line of grid">
+        <div *ngFor="let l of line" class="grid-item">{{l}}</div>
+    </ng-container>
+</div>
+
