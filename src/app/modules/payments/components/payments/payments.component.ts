@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { LogicService } from 'src/app/modules/shared/services/logic.service';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { Payment } from '../../models/payments.model';
-import { StoreService } from '../../services/store.service';
+import { StoreService } from 'src/app/modules/shared/services/store.service';
+import { State } from 'src/app/modules/shared/models/state.model';
+import { Payment } from 'src/app/modules/shared/models/payments.model';
 
 @Component({
   selector: 'app-payments',
@@ -13,12 +14,16 @@ export class PaymentsComponent implements OnInit {
 
   result = '';
   formGroup: FormGroup;
+  payments: Payment[] = [];
 
   constructor(private logicService: LogicService, private formBuilder: FormBuilder, public store: StoreService) { }
 
   ngOnInit(): void {
     this.createForm();
-    this.logicService.getResultObs().subscribe(res => this.result = res);
+    this.store.state$.subscribe((res: State) => {
+      this.result = res.result;
+      this.payments = res.payments;
+    });
   }
 
   createForm(): void {
@@ -38,7 +43,7 @@ export class PaymentsComponent implements OnInit {
   }
 
   sendToApi(): void {
-    console.log(this.store.payments);
+    console.log(this.store.state.payments);
   }
 
 }

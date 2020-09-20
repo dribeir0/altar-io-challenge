@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subscription, interval, BehaviorSubject, Observable } from 'rxjs';
+import { StoreService } from './store.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,35 +17,7 @@ export class LogicService {
   width = 10;
   height = 10;
 
-  private resultObs$: BehaviorSubject<string> = new BehaviorSubject(null);
-  private gridObs$: BehaviorSubject<number[][]> = new BehaviorSubject(null);
-  private canLetterChangeObs$: BehaviorSubject<boolean> = new BehaviorSubject(true);
-
-  constructor() { }
-
-  getResultObs(): Observable<string> {
-    return this.resultObs$.asObservable();
-  }
-
-  setResultObs(res: string): void {
-    this.resultObs$.next(res);
-  }
-
-  getGridObs(): Observable<number[][]> {
-    return this.gridObs$.asObservable();
-  }
-
-  setGridObs(res: number[][]): void {
-    this.gridObs$.next(res);
-  }
-
-  getCanLetterChange(): Observable<boolean> {
-    return this.canLetterChangeObs$.asObservable();
-  }
-
-  setCanLetterChange(res: boolean): void {
-    this.canLetterChangeObs$.next(res);
-  }
+  constructor(private store: StoreService) { }
 
   start(): void {
     this.counterMap = {};
@@ -56,16 +29,21 @@ export class LogicService {
       });
   }
 
-  getRandomLetter(): string {
+  setSelectedLetter(letter: string): void {
+    this.selectedLetter = letter;
+    this.letterChange = true;
+  }
+
+  private getRandomLetter(): string {
     return this.alphabet[Math.floor(Math.random() * this.alphabet.length)];
   }
 
-  generateGrid(height: number, width: number): void {
+  private generateGrid(height: number, width: number): void {
     if (this.letterChange) {
-      this.setCanLetterChange(false);
+      this.store.setCanLetterChange(false);
+      this.letterChange = false;
       setTimeout(() => {
-        this.setCanLetterChange(true);
-        this.letterChange = false;
+        this.store.setCanLetterChange(true);
       }, 4000);
     }
     for (let i = 0; i < height; i++) {
@@ -85,13 +63,13 @@ export class LogicService {
     if (this.selectedLetter) {
       this.setLetter(this.selectedLetter);
     } else {
-      this.setGridObs(this.grid);
+      this.store.setGrid(this.grid);
     }
 
     this.getResult();
   }
 
-  setLetter(letter: string): void {
+  private setLetter(letter: string): void {
     if (this.counterMap[letter] == null) {
       this.counterMap[letter] = 0;
     }
@@ -103,15 +81,15 @@ export class LogicService {
         this.counterMap[letter]++;
       }
     }
-    this.setGridObs(this.grid);
+    this.store.setGrid(this.grid);
   }
 
-  getResult(): void {
+  private getResult(): void {
     const seconds = new Date().getSeconds();
     const splitSeconds = seconds < 10 ? [0, seconds] : [...seconds + ''].map(n => +n);
     const val1 = this.counterMap[this.grid[splitSeconds[0]][splitSeconds[1]]];
     const val2 = this.counterMap[this.grid[splitSeconds[1]][splitSeconds[0]]];
-    this.setResultObs(`${val1}${val2}`);
+    this.store.setResult(`${val1}${val2}`);
   }
 
   getCurrentGrid(): number[][] {

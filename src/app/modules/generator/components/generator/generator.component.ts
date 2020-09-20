@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { State } from 'src/app/modules/shared/models/state.model';
 import { LogicService } from 'src/app/modules/shared/services/logic.service';
+import { StoreService } from 'src/app/modules/shared/services/store.service';
 
 @Component({
   selector: 'app-generator',
@@ -10,38 +12,32 @@ import { LogicService } from 'src/app/modules/shared/services/logic.service';
 export class GeneratorComponent implements OnInit {
 
   result = '';
-
   formGroup: FormGroup;
-
   grid = [[]];
+  canChange = false;
 
-  constructor(private formBuilder: FormBuilder, private logicService: LogicService) { }
+  constructor(private formBuilder: FormBuilder, private logicService: LogicService, private store: StoreService) { }
 
   ngOnInit(): void {
     this.createForm();
     this.formGroup.get('letter').valueChanges.subscribe((val: string) => {
       if (val.length === 1) {
-        this.logicService.selectedLetter = val;
-        this.logicService.letterChange = true;
+        this.logicService.setSelectedLetter(val);
       } else {
-        this.logicService.selectedLetter = null;
+        this.logicService.setSelectedLetter(null);
       }
     });
 
-    this.logicService.getResultObs().subscribe(res => this.result = res);
-    this.logicService.getGridObs().subscribe(res => this.grid = res);
-    this.logicService.getCanLetterChange().subscribe(res => {
-      if (res) {
-        this.formGroup.get('letter').enable();
-      } else {
-        this.formGroup.get('letter').disable();
-      }
+    this.store.state$.subscribe((res: State) => {
+      this.result = res.result;
+      this.grid = res.currentGrid;
+      this.canChange = res.canLetterChange;
     });
   }
 
   createForm(): void {
     this.formGroup = this.formBuilder.group({
-      letter: [{ value: '', disabled: false }, [Validators.maxLength(1)]]
+      letter: [null, [Validators.maxLength(1)]]
     });
   }
 

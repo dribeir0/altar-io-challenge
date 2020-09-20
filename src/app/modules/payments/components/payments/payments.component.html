@@ -14,13 +14,14 @@
         Add
     </button>
 
-    <button class="default-padding" mat-button (click)="sendToApi()">
-        Send to API
-    </button>
-
 </form>
+
+<button class="default-padding" mat-button (click)="sendToApi()">
+    Send to API
+</button>
+
 <div class="container mt-5">
-    <div *ngFor="let item of store.paymentsObs$ | async" class="row pt-2">
+    <div *ngFor="let item of payments" class="row pt-2">
         <div class="col">{{item.name}}</div>
         <div class="col">{{item.amount}}</div>
         <div class="col">{{item.code}}</div>

@@ -3,7 +3,7 @@
     <button  mat-button (click)="start()">Start</button>
     
     <mat-form-field class="form-element" style="float: right;">
-        <input matInput placeholder="Letter" formControlName="letter">
+        <input matInput placeholder="Letter" formControlName="letter" [readonly]="!canChange">
     </mat-form-field>
 
 </form>
